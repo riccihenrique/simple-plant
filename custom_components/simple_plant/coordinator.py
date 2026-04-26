@@ -150,6 +150,27 @@ class SimplePlantCoordinator(DataUpdateCoordinator[dict]):
             "today": utcnow(),
         }
 
+    async def async_seed_fertilization_store(self, entry_data: dict) -> None:
+        """Seed store with fertilization values from entry data, overwriting stale data."""
+        last_fertilized = entry_data.get("last_fertilized")
+        days = entry_data.get("days_between_fertilizations")
+        store_data: dict = {}
+        if last_fertilized:
+            date_utc = as_utc(as_local(datetime.fromisoformat(str(last_fertilized))))
+            store_data["last_fertilized"] = date_utc.isoformat()
+        if days is not None:
+            unique_id = f"{DOMAIN}_days_between_fertilizations_{self.device}"
+            store_data[unique_id] = float(days)
+        if store_data:
+            await self.store.async_save_data(self.device, store_data)
+
+    async def async_clear_fertilization_store(self) -> None:
+        """Remove fertilization data from store."""
+        data = await self.store.async_get_data(self.device)
+        keys_to_remove = [k for k in data if "fertiliz" in k]
+        if keys_to_remove:
+            await self.store.async_remove_keys(self.device, keys_to_remove)
+
     async def async_set_last_fertilized(self, value: datetime) -> None:
         """Change last fertilized date manually."""
         new_value = as_utc(value)

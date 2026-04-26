@@ -53,11 +53,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-    # Remove fertilization entities if fertilization is disabled
-    if not entry.data.get("enable_fertilization", False):
+    # Seed or clear fertilization store data before platforms are set up
+    if entry.data.get("enable_fertilization", False):
+        await coordinator.async_seed_fertilization_store(entry.data)
+    else:
+        await coordinator.async_clear_fertilization_store()
         _remove_fertilization_entities(hass, entry)
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
     entry.async_on_unload(

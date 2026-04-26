@@ -89,7 +89,9 @@ class SimplePlantDate(CoordinatorEntity[SimplePlantCoordinator], DateEntity):
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to hass."""
         await super().async_added_to_hass()
-        if not self.native_value:
+        # Only write fallback if this key has never been stored
+        data = self.coordinator.data or {}
+        if self.entity_description.key not in data:
             await self.async_set_value(self._fallback_value)
 
     async def async_set_value(self, value: date) -> None:

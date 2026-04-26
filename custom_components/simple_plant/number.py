@@ -30,6 +30,8 @@ ENTITY_DESCRIPTIONS = (
         mode=NumberMode.BOX,
         icon="mdi:counter",
         native_step=0,
+        native_min_value=1,
+        native_max_value=60,
         native_unit_of_measurement=UnitOfTime.DAYS,
     ),
     NumberEntityDescription(
@@ -39,6 +41,8 @@ ENTITY_DESCRIPTIONS = (
         mode=NumberMode.BOX,
         icon="mdi:counter",
         native_step=0,
+        native_min_value=1,
+        native_max_value=365,
         native_unit_of_measurement=UnitOfTime.DAYS,
     ),
 )
@@ -84,6 +88,12 @@ class SimplePlantNumber(NumberEntity):
 
         self.entity_id = f"number.{DOMAIN}_{description.key}_{device}"
         self._attr_unique_id = f"{DOMAIN}_{description.key}_{device}"
+
+        # Override min/max from description if provided
+        if description.native_min_value is not None:
+            self._attr_native_min_value = description.native_min_value
+        if description.native_max_value is not None:
+            self._attr_native_max_value = description.native_max_value
 
         # set value — default to 30 days if not configured (migration from older entries)
         self._fallback_value = entry.data.get(description.key) or 30

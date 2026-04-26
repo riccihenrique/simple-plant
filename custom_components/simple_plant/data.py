@@ -62,6 +62,23 @@ class SimplePlantStore:
         LOGGER.debug("Storing following data to device %s : %s", device, data)
         await self.store.async_save(self._data)
 
+    async def async_remove_keys(self, device: str, keys: list[str]) -> None:
+        """Remove specific keys from device data in storage."""
+        if self._data is None:
+            await self.async_load()
+        if self._data is None:  # for linting
+            LOGGER.error("Failed to load data from storage")
+            return
+        device_data = self._data.get(device, {})
+        changed = False
+        for key in keys:
+            if key in device_data:
+                del device_data[key]
+                changed = True
+        if changed:
+            self._data[device] = device_data
+            await self.store.async_save(self._data)
+
     async def async_remove_device(self, device: str) -> None:
         """Remove device data from storage."""
         if self._data is None:
