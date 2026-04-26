@@ -105,10 +105,18 @@ def user_form() -> vol.Schema:
                 selector.FileSelectorConfig(accept="image/*")
             ),
             vol.Optional("enable_fertilization", default=False): selector.BooleanSelector(),
-            vol.Optional("last_fertilized"): selector.DateSelector(
+        }
+    )
+
+
+def fertilization_form() -> vol.Schema:
+    """Return fertilization fields form."""
+    return vol.Schema(
+        {
+            vol.Required("last_fertilized"): selector.DateSelector(
                 selector.DateSelectorConfig(),
             ),
-            vol.Optional("days_between_fertilizations"): selector.NumberSelector(
+            vol.Required("days_between_fertilizations"): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=1,
                     max=365,
@@ -180,32 +188,12 @@ class SimplePlantFlowHandler(ConfigFlow, domain=DOMAIN):
                     data_schema=user_form(),
                     errors={"base": "invalid_future_date"},
                 )
-        # Verify fertilized date (only when fertilization is enabled)
-        if user_input.get("enable_fertilization"):
-            if not user_input.get("last_fertilized") or not user_input.get("days_between_fertilizations"):
-                return self.async_show_form(
-                    step_id="user",
-                    data_schema=user_form(),
-                    errors={"base": "fertilization_fields_required"},
-                )
-            date = as_utc(as_local(datetime.fromisoformat(user_input["last_fertilized"])))
-            if date > utcnow():
-                return self.async_show_form(
-                    step_id="user",
-                    data_schema=user_form(),
-                    errors={"base": "invalid_future_date"},
-                )
-        else:
-            # Strip fertilization fields if not enabled
-            user_input.pop("last_fertilized", None)
-            user_input.pop("days_between_fertilizations", None)
         if "photo" not in user_input:
             return self.async_show_form(
                 step_id="user",
                 errors={"base": "upload_failed_generic"},
             )
         file_id = user_input["photo"]
-
         try:
             user_input["photo"] = await save_image(self.hass, file_id)
         except ValueError:
@@ -214,7 +202,29 @@ class SimplePlantFlowHandler(ConfigFlow, domain=DOMAIN):
                 errors={"base": "upload_failed_type"},
             )
 
-        return self.async_create_entry(title=user_input["name"], data=user_input)
+        self._user_inputs.update(user_input)
+
+        if user_input.get("enable_fertilization"):
+            return await self.async_step_fertilization()
+
+        return self.async_create_entry(title=self._user_inputs["name"], data=self._user_inputs)
+
+    async def async_step_fertilization(self, user_input: dict | None = None) -> ConfigFlowResult:
+        """Provide fertilization information."""
+        if user_input is None:
+            return self.async_show_form(step_id="fertilization", data_schema=fertilization_form())
+
+        # Verify fertilized date
+        date = as_utc(as_local(datetime.fromisoformat(user_input["last_fertilized"])))
+        if date > utcnow():
+            return self.async_show_form(
+                step_id="fertilization",
+                data_schema=fertilization_form(),
+                errors={"base": "invalid_future_date"},
+            )
+
+        self._user_inputs.update(user_input)
+        return self.async_create_entry(title=self._user_inputs["name"], data=self._user_inputs)
 
 
 class SimplePlantOptionFlowHandler(OptionsFlow):

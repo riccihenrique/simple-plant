@@ -8,11 +8,16 @@
           "last_watered": "Última rega",
           "days_between_waterings": "Dias entre regas",
           "enable_fertilization": "Ativar controle de adubação",
-          "last_fertilized": "Última adubação",
-          "days_between_fertilizations": "Dias entre adubações",
           "photo": "Foto",
           "health": "Saúde atual (Opcional)",
           "species": "Espécie/Variedade da sua planta (Opcional)"
+        }
+      },
+      "fertilization": {
+        "description": "Informe os dados de adubação da sua planta.",
+        "data": {
+          "last_fertilized": "Última adubação",
+          "days_between_fertilizations": "Dias entre adubações"
         }
       }
     },
