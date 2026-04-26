@@ -1,0 +1,114 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Forneça as informações básicas da sua nova planta. Se precisar de ajuda com a configuração, acesse: https://github.com/ndesgranges/simple-plant",
+        "data": {
+          "name": "Nome",
+          "last_watered": "Última rega",
+          "days_between_waterings": "Dias entre regas",
+          "last_fertilized": "Última adubação",
+          "days_between_fertilizations": "Dias entre adubações",
+          "photo": "Foto",
+          "health": "Saúde atual (Opcional)",
+          "species": "Espécie/Variedade da sua planta (Opcional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_future_date": "Não é possível definir a data de rega no futuro.",
+      "name_exist": "Já existe uma planta com esse nome",
+      "upload_failed_generic": "Falha no upload do arquivo, algo deu errado.",
+      "upload_failed_type": "Falha no upload do arquivo, o tipo de arquivo não é um tipo de imagem suportado.",
+      "unknown": "Ocorreu um erro desconhecido."
+    },
+    "abort": {
+      "already_configured": "Esta entrada já está configurada."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Modifique a espécie ou a foto da sua planta. Se precisar de ajuda com a configuração, acesse: https://github.com/ndesgranges/simple-plant",
+        "data": {
+          "photo": "Foto",
+          "species": "Espécie/Variedade da sua planta (Opcional)"
+        }
+      }
+    },
+    "error": {
+      "upload_failed_type": "Falha no upload do arquivo, o tipo de arquivo não é um tipo de imagem suportado."
+    }
+  },
+  "entity": {
+    "button": {
+      "mark_watered": {
+        "name": "Marcar como regada"
+      },
+      "mark_fertilized": {
+        "name": "Marcar como adubada"
+      }
+    },
+    "binary_sensor": {
+      "todo": {
+        "name": "Para regar"
+      },
+      "problem": {
+        "name": "Regagem atrasada"
+      },
+      "todo_fertilization": {
+        "name": "Para adubar"
+      },
+      "problem_fertilization": {
+        "name": "Adubação atrasada"
+      }
+    },
+    "date": {
+      "last_watered": {
+        "name": "Última rega"
+      },
+      "last_fertilized": {
+        "name": "Última adubação"
+      }
+    },
+    "image": {
+      "picture": {
+        "name": "Foto"
+      }
+    },
+    "number": {
+      "days_between_waterings": {
+        "name": "Dias entre regas"
+      },
+      "days_between_fertilizations": {
+        "name": "Dias entre adubações"
+      }
+    },
+    "select": {
+      "health": {
+        "name": "Saúde atual",
+        "state": {
+          "notset": "Não definido",
+          "poor": "Pobre",
+          "fair": "Razoável",
+          "good": "Boa",
+          "verygood": "Muito boa",
+          "excellent": "Excelente"
+        }
+      }
+    },
+    "sensor": {
+      "next_watering": {
+        "name": "Próxima rega"
+      },
+      "next_fertilization": {
+        "name": "Próxima adubação"
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_future_date": {
+      "message": "Não é possível definir a data de rega no futuro."
+    }
+  }
+}
