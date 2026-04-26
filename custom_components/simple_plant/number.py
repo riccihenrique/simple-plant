@@ -50,9 +50,11 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the number platform."""
+    fertilization_enabled = entry.data.get("enable_fertilization", False)
     async_add_entities(
         SimplePlantNumber(hass, entry, entity_description)
         for entity_description in ENTITY_DESCRIPTIONS
+        if fertilization_enabled or entity_description.key != "days_between_fertilizations"
     )
 
 

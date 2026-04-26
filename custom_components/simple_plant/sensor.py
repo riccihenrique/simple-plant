@@ -51,10 +51,12 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
+    fertilization_enabled = entry.data.get("enable_fertilization", False)
     entities = []
     for entity_description in ENTITY_DESCRIPTIONS:
         if entity_description.key == "next_fertilization":
-            entities.append(SimplePlantFertilizationSensor(hass, entry, entity_description))
+            if fertilization_enabled:
+                entities.append(SimplePlantFertilizationSensor(hass, entry, entity_description))
         else:
             entities.append(SimplePlantSensor(hass, entry, entity_description))
     async_add_entities(entities)

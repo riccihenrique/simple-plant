@@ -280,12 +280,18 @@ ENTITIES = [
 ]
 
 
+FERTILIZATION_KEYS = {"todo_fertilization", "problem_fertilization"}
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the binary_sensor platform."""
+    fertilization_enabled = entry.data.get("enable_fertilization", False)
     async_add_entities(
-        entity["class"](hass, entry, entity["description"]) for entity in ENTITIES
+        entity["class"](hass, entry, entity["description"])
+        for entity in ENTITIES
+        if fertilization_enabled or entity["description"].key not in FERTILIZATION_KEYS
     )

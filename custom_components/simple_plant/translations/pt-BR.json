@@ -7,6 +7,7 @@
           "name": "Nome",
           "last_watered": "Última rega",
           "days_between_waterings": "Dias entre regas",
+          "enable_fertilization": "Ativar controle de adubação",
           "last_fertilized": "Última adubação",
           "days_between_fertilizations": "Dias entre adubações",
           "photo": "Foto",
@@ -18,6 +19,7 @@
     "error": {
       "invalid_future_date": "Não é possível definir a data de rega no futuro.",
       "name_exist": "Já existe uma planta com esse nome",
+      "fertilization_fields_required": "Preencha a data da última adubação e os dias entre adubações.",
       "upload_failed_generic": "Falha no upload do arquivo, algo deu errado.",
       "upload_failed_type": "Falha no upload do arquivo, o tipo de arquivo não é um tipo de imagem suportado.",
       "unknown": "Ocorreu um erro desconhecido."
