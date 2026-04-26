@@ -1,94 +1,114 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "description": "Provide base information for your new plant. If you need help with the configuration have a look here: https://github.com/ndesgranges/simple-plant",
-                "data": {
-                    "name": "Name",
-                    "last_watered": "Last time watered",
-                    "days_between_waterings": "Days between watering",
-                    "photo": "Photo",
-                    "health": "Current health (Optional)",
-                    "species": "Species/Variety of your plant (Optional)"
-                }
-            }
-        },
-        "error": {
-            "invalid_future_date": "Cannot set watering date in the future.",
-            "name_exist": "Plant with this name already exist",
-            "upload_failed_generic": "File upload failed, soomething went wrong.",
-            "upload_failed_type": "File upload failed, the file type is not a supported image type.",
-            "unknown": "Unknown error occurred."
-        },
-        "abort": {
-            "already_configured": "This entry is already configured."
+  "config": {
+    "step": {
+      "user": {
+        "description": "Provide base information for your new plant. If you need help with the configuration have a look here: https://github.com/ndesgranges/simple-plant",
+        "data": {
+          "name": "Name",
+          "last_watered": "Last time watered",
+          "days_between_waterings": "Days between watering",
+          "last_fertilized": "Last time fertilized",
+          "days_between_fertilizations": "Days between fertilizations",
+          "photo": "Photo",
+          "health": "Current health (Optional)",
+          "species": "Species/Variety of your plant (Optional)"
         }
+      }
     },
-    "options": {
-        "step": {
-            "init": {
-                "description": "Modify the species or picture of your plant. If you need help with the configuration have a look here: https://github.com/ndesgranges/simple-plant",
-                "data": {
-                    "photo": "Photo",
-                    "species": "Species/Variety of your plant (Optional)"
-                }
-            }
-        },
-        "error": {
-            "upload_failed_type": "File upload failed, the file type is not a supported image type."
-        }
+    "error": {
+      "invalid_future_date": "Cannot set watering date in the future.",
+      "name_exist": "Plant with this name already exist",
+      "upload_failed_generic": "File upload failed, soomething went wrong.",
+      "upload_failed_type": "File upload failed, the file type is not a supported image type.",
+      "unknown": "Unknown error occurred."
     },
-    "entity": {
-        "button": {
-            "mark_watered": {
-                "name": "Mark watered"
-            }
-        },
-        "binary_sensor": {
-            "todo": {
-                "name": "To Water"
-            },
-            "problem": {
-                "name": "Late Watering"
-            }
-        },
-        "date": {
-            "last_watered": {
-                "name": "Last time watered"
-            }
-        },
-        "image": {
-            "picture": {
-                "name": "Picture"
-            }
-        },
-        "number": {
-            "days_between_waterings": {
-                "name": "Days between waterings"
-            }
-        },
-        "select": {
-            "health": {
-                "name": "Current health",
-                "state": {
-                    "notset": "Not Set",
-                    "poor": "Poor",
-                    "fair": "Fair",
-                    "good": "Good",
-                    "verygood": "Very Good",
-                    "excellent": "Excellent"
-                }
-            }
-        },
-        "sensor": {
-            "next_watering": {
-                "name": "Next watering"
-            }
-        }
-    },
-    "exceptions": {
-        "invalid_future_date": {
-            "message": "Cannot set watering date in the future."
-        }
+    "abort": {
+      "already_configured": "This entry is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Modify the species or picture of your plant. If you need help with the configuration have a look here: https://github.com/ndesgranges/simple-plant",
+        "data": {
+          "photo": "Photo",
+          "species": "Species/Variety of your plant (Optional)"
+        }
+      }
+    },
+    "error": {
+      "upload_failed_type": "File upload failed, the file type is not a supported image type."
+    }
+  },
+  "entity": {
+    "button": {
+      "mark_watered": {
+        "name": "Mark watered"
+      },
+      "mark_fertilized": {
+        "name": "Mark fertilized"
+      }
+    },
+    "binary_sensor": {
+      "todo": {
+        "name": "To Water"
+      },
+      "problem": {
+        "name": "Late Watering"
+      },
+      "todo_fertilization": {
+        "name": "To Fertilize"
+      },
+      "problem_fertilization": {
+        "name": "Late Fertilization"
+      }
+    },
+    "date": {
+      "last_watered": {
+        "name": "Last time watered"
+      },
+      "last_fertilized": {
+        "name": "Last time fertilized"
+      }
+    },
+    "image": {
+      "picture": {
+        "name": "Picture"
+      }
+    },
+    "number": {
+      "days_between_waterings": {
+        "name": "Days between waterings"
+      },
+      "days_between_fertilizations": {
+        "name": "Days between fertilizations"
+      }
+    },
+    "select": {
+      "health": {
+        "name": "Current health",
+        "state": {
+          "notset": "Not Set",
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "verygood": "Very Good",
+          "excellent": "Excellent"
+        }
+      }
+    },
+    "sensor": {
+      "next_watering": {
+        "name": "Next watering"
+      },
+      "next_fertilization": {
+        "name": "Next fertilization"
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_future_date": {
+      "message": "Cannot set watering date in the future."
+    }
+  }
 }

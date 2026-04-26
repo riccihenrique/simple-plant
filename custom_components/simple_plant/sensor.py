@@ -34,6 +34,12 @@ ENTITY_DESCRIPTIONS = (
         translation_key="next_watering",
         icon="mdi:clipboard-text-clock",
     ),
+    SensorEntityDescription(
+        device_class=SensorDeviceClass.DATE,
+        key="next_fertilization",
+        translation_key="next_fertilization",
+        icon="mdi:sprout-outline",
+    ),
 )
 
 COLOR_MAPPING = {"Today": "Goldenrod", "Late": "Tomato"}
@@ -45,10 +51,13 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    async_add_entities(
-        SimplePlantSensor(hass, entry, entity_description)
-        for entity_description in ENTITY_DESCRIPTIONS
-    )
+    entities = []
+    for entity_description in ENTITY_DESCRIPTIONS:
+        if entity_description.key == "next_fertilization":
+            entities.append(SimplePlantFertilizationSensor(hass, entry, entity_description))
+        else:
+            entities.append(SimplePlantSensor(hass, entry, entity_description))
+    async_add_entities(entities)
 
 
 class SimplePlantSensor(SensorEntity):
@@ -155,4 +164,70 @@ class SimplePlantSensor(SensorEntity):
 
         # Value
         self._attr_native_value = next_watering
+        self.async_write_ha_state()
+
+
+class SimplePlantFertilizationSensor(SimplePlantSensor):
+    """simple_plant sensor for next fertilization."""
+
+    async def async_added_to_hass(self) -> None:
+        """Run when entity is added to hass."""
+        await super(SimplePlantSensor, self).async_added_to_hass()
+
+        self.async_on_remove(
+            async_track_state_change_event(
+                self.hass,
+                f"date.{DOMAIN}_last_fertilized_{self.device}",
+                self._update_state,
+            )
+        )
+        self.async_on_remove(
+            async_track_state_change_event(
+                self.hass,
+                f"number.{DOMAIN}_days_between_fertilizations_{self.device}",
+                self._update_state,
+            )
+        )
+        self.async_on_remove(
+            async_track_time_change(
+                self.hass,
+                self._update_state,
+                hour=0,
+                minute=0,
+                second=0,
+            )
+        )
+
+        # Initial update
+        await self._update_state()
+
+    async def _update_state(
+        self, _event: Event[EventStateChangedData] | datetime | None = None
+    ) -> None:
+        """Update the sensor state based on fertilization entities."""
+        dates = self.coordinator.get_fertilizer_dates()
+
+        if not dates:
+            return
+
+        # Color
+        today = as_local(dates["today"]).date()
+        next_fertilization = as_local(dates["next_fertilization"]).date()
+
+        color_key = "OK"
+        if today == next_fertilization:
+            color_key = "Today"
+        if today > next_fertilization:
+            color_key = "Late"
+
+        if color_key in COLOR_MAPPING:
+            self._attr_extra_state_attributes = {
+                "state_color": True,
+                "color": COLOR_MAPPING[color_key],
+            }
+        else:
+            self._attr_extra_state_attributes = {"state_color": False}
+
+        # Value
+        self._attr_native_value = next_fertilization
         self.async_write_ha_state()

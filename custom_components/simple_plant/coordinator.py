@@ -149,3 +149,91 @@ class SimplePlantCoordinator(DataUpdateCoordinator[dict]):
             "next_watering": last_watered_date + timedelta(days=nb_days),
             "today": utcnow(),
         }
+
+    async def async_set_last_fertilized(self, value: datetime) -> None:
+        """Change last fertilized date manually."""
+        new_value = as_utc(value)
+        if new_value > utcnow():
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="invalid_future_date",
+                translation_placeholders={},
+            )
+        await self.store.async_save_data(
+            self.device, {"last_fertilized": new_value.isoformat()}
+        )
+        await self.async_refresh()
+
+    async def async_mark_as_fertilized_toggle(self) -> None:
+        """Toggle last fertilized between old value and today."""
+        data = await self.store.async_get_data(self.device)
+        if data is None:
+            LOGGER.warning("%s: No data found in storage", self.device)
+            return
+
+        last_fertilized = None
+        old_last_fertilized = None
+        if "last_fertilized" in data:
+            last_fertilized = as_utc(
+                as_local(datetime.fromisoformat(data["last_fertilized"]))
+            )
+        if "_old_last_fertilized" in data:
+            old_last_fertilized = as_utc(
+                as_local(datetime.fromisoformat(data["_old_last_fertilized"]))
+            )
+
+        if last_fertilized and as_local(last_fertilized).date() != as_local(utcnow()).date():
+            await self.async_action_mark_as_fertilized(save_old=last_fertilized)
+        else:
+            await self.async_action_cancel_mark_as_fertilized(old_value=old_last_fertilized)
+
+    async def async_action_cancel_mark_as_fertilized(
+        self, old_value: datetime | None = None
+    ) -> None:
+        """Update last fertilized date to old value."""
+        if old_value:
+            await self.async_set_last_fertilized(as_utc(old_value))
+        else:
+            await self.async_action_mark_as_fertilized()
+
+    async def async_action_mark_as_fertilized(
+        self, save_old: datetime | None = None
+    ) -> None:
+        """Update last fertilized date today."""
+        today = utcnow()
+        if save_old:
+            await self.store.async_save_data(
+                self.device, {"_old_last_fertilized": as_utc(save_old).isoformat()}
+            )
+        await self.async_set_last_fertilized(today)
+
+    def get_fertilizer_dates(self) -> dict[str, datetime] | None:
+        """Get dates from relevant device entities states for fertilizer."""
+        states_to_get = {
+            "last_fertilized": f"date.{DOMAIN}_last_fertilized_{self.device}",
+            "nb_days": f"number.{DOMAIN}_days_between_fertilizations_{self.device}",
+        }
+
+        # Get states from hass
+        data = {key: self.hass.states.get(eid) for key, eid in states_to_get.items()}
+
+        # Check if all states are available
+        if any(
+            data[key] is None
+            or not data[key].state  # type: ignore noqa: PGH003
+            or data[key].state == "unavailable"  # type: ignore noqa: PGH003
+            for key in states_to_get
+        ):
+            LOGGER.warning("%s: Couldn't get all fertilizer states", self.device)
+            return None
+
+        states = {key: data.state for key, data in data.items() if data is not None}
+
+        last_fertilized_date = datetime.fromisoformat(states["last_fertilized"])
+        nb_days = float(states["nb_days"])
+
+        return {
+            "last_fertilized": last_fertilized_date,
+            "next_fertilization": last_fertilized_date + timedelta(days=nb_days),
+            "today": utcnow(),
+        }

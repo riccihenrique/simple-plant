@@ -25,6 +25,11 @@ ENTITY_DESCRIPTIONS = (
         translation_key="mark_watered",
         icon="mdi:watering-can",
     ),
+    ButtonEntityDescription(
+        key="mark_fertilized",
+        translation_key="mark_fertilized",
+        icon="mdi:sprout",
+    ),
 )
 
 
@@ -72,4 +77,7 @@ class SimplePlantButton(ButtonEntity):
 
     async def async_press(self) -> None:
         """Press the button."""
-        await self.coordinator.async_mark_as_watered_toggle()
+        if self.entity_description.key == "mark_fertilized":
+            await self.coordinator.async_mark_as_fertilized_toggle()
+        else:
+            await self.coordinator.async_mark_as_watered_toggle()

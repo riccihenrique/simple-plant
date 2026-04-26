@@ -32,6 +32,15 @@ ENTITY_DESCRIPTIONS = (
         native_step=0,
         native_unit_of_measurement=UnitOfTime.DAYS,
     ),
+    NumberEntityDescription(
+        key="days_between_fertilizations",
+        translation_key="days_between_fertilizations",
+        device_class=NumberDeviceClass.DURATION,
+        mode=NumberMode.BOX,
+        icon="mdi:counter",
+        native_step=0,
+        native_unit_of_measurement=UnitOfTime.DAYS,
+    ),
 )
 
 
@@ -75,7 +84,7 @@ class SimplePlantNumber(NumberEntity):
         self._attr_unique_id = f"{DOMAIN}_{description.key}_{device}"
 
         # set value
-        self._fallback_value = entry.data.get("days_between_waterings")
+        self._fallback_value = entry.data.get(description.key)
 
         # Set up device info
         self._attr_device_info = self.coordinator.device_info

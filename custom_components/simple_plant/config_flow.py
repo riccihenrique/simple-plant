@@ -92,6 +92,17 @@ def user_form() -> vol.Schema:
                     unit_of_measurement="days",
                 ),
             ),
+            vol.Required("last_fertilized"): selector.DateSelector(
+                selector.DateSelectorConfig(),
+            ),
+            vol.Required("days_between_fertilizations"): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1,
+                    max=365,
+                    mode=selector.NumberSelectorMode.BOX,
+                    unit_of_measurement="days",
+                ),
+            ),
             vol.Required("health"): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     {
@@ -163,6 +174,15 @@ class SimplePlantFlowHandler(ConfigFlow, domain=DOMAIN):
         # Verify date
         if "last_watered" in user_input:
             date = as_utc(as_local(datetime.fromisoformat(user_input["last_watered"])))
+            if date > utcnow():
+                return self.async_show_form(
+                    step_id="user",
+                    data_schema=user_form(),
+                    errors={"base": "invalid_future_date"},
+                )
+        # Verify fertilized date
+        if "last_fertilized" in user_input:
+            date = as_utc(as_local(datetime.fromisoformat(user_input["last_fertilized"])))
             if date > utcnow():
                 return self.async_show_form(
                     step_id="user",

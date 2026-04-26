@@ -153,6 +153,91 @@ class SimplePlantProblem(SimplePlantBinarySensor):
         self.async_write_ha_state()
 
 
+class SimplePlantFertilizationBinarySensor(SimplePlantBinarySensor):
+    """Base class for fertilization binary sensors."""
+
+    async def async_added_to_hass(self) -> None:
+        """Run when entity about to be added to hass."""
+        await super(SimplePlantBinarySensor, self).async_added_to_hass()
+        device = self.coordinator.device
+
+        # Subscribe to fertilization state changes
+        self.async_on_remove(
+            async_track_state_change_event(
+                self.hass,
+                f"date.{DOMAIN}_last_fertilized_{device}",
+                self._update_state,
+            )
+        )
+        self.async_on_remove(
+            async_track_state_change_event(
+                self.hass,
+                f"number.{DOMAIN}_days_between_fertilizations_{device}",
+                self._update_state,
+            )
+        )
+        self.async_on_remove(
+            async_track_time_change(
+                self.hass,
+                self._update_state,
+                hour=0,
+                minute=0,
+                second=0,
+            )
+        )
+
+        # Initial update
+        await self._update_state()
+
+    def get_dates(self) -> dict | None:
+        """Get fertilizer dates from coordinator."""
+        return self.coordinator.get_fertilizer_dates()
+
+    async def _update_state(
+        self,
+        _event: Event[EventStateChangedData] | datetime | None = None,
+    ) -> None:
+        """Update the binary sensor state based on other entities."""
+        raise NotImplementedError
+
+
+class SimplePlantFertilizationTodo(SimplePlantFertilizationBinarySensor):
+    """simple_plant binary_sensor for fertilization todo."""
+
+    _fallback_value = False
+
+    async def _update_state(self, _event: Event | None = None) -> None:
+        """Update the binary sensor state based on fertilization entities."""
+        dates = self.get_dates()
+
+        if not dates:
+            return
+
+        self._attr_native_value = (
+            as_local(dates["today"]).date() >= as_local(dates["next_fertilization"]).date()
+        )
+        self.async_write_ha_state()
+
+
+class SimplePlantFertilizationProblem(SimplePlantFertilizationBinarySensor):
+    """simple_plant binary_sensor for fertilization problem."""
+
+    _fallback_value = False
+    _attr_translation_key = "problem_fertilization"
+
+    async def _update_state(self, _event: Event | None = None) -> None:
+        """Update the binary sensor state based on fertilization entities."""
+        dates = self.get_dates()
+
+        if not dates:
+            return
+
+        self._attr_native_value = (
+            as_local(dates["today"]).date() > as_local(dates["next_fertilization"]).date()
+        )
+        self.async_write_ha_state()
+
+
 ENTITIES = [
     {
         "class": SimplePlantTodo,
@@ -171,6 +256,25 @@ ENTITIES = [
             name="Simple Plant Binary Sensor Problem",
             device_class=BinarySensorDeviceClass.PROBLEM,
             icon="mdi:water-alert-outline",
+        ),
+    },
+    {
+        "class": SimplePlantFertilizationTodo,
+        "description": BinarySensorEntityDescription(
+            key="todo_fertilization",
+            translation_key="todo_fertilization",
+            name="Simple Plant Binary Sensor Fertilization Todo",
+            icon="mdi:sprout",
+        ),
+    },
+    {
+        "class": SimplePlantFertilizationProblem,
+        "description": BinarySensorEntityDescription(
+            key="problem_fertilization",
+            translation_key="problem_fertilization",
+            name="Simple Plant Binary Sensor Fertilization Problem",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            icon="mdi:leaf-off",
         ),
     },
 ]

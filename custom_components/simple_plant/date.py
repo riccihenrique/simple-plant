@@ -27,6 +27,11 @@ ENTITY_DESCRIPTIONS = (
         translation_key="last_watered",
         icon="mdi:calendar-check",
     ),
+    DateEntityDescription(
+        key="last_fertilized",
+        translation_key="last_fertilized",
+        icon="mdi:calendar-star",
+    ),
 )
 
 
@@ -61,7 +66,7 @@ class SimplePlantDate(CoordinatorEntity[SimplePlantCoordinator], DateEntity):
         device = self.coordinator.device
 
         self._fallback_value = as_local(
-            datetime.fromisoformat(str(entry.data.get("last_watered")))
+            datetime.fromisoformat(str(entry.data.get(description.key)))
         ).date()
 
         self.entity_id = f"date.{DOMAIN}_{description.key}_{device}"
@@ -86,7 +91,10 @@ class SimplePlantDate(CoordinatorEntity[SimplePlantCoordinator], DateEntity):
         # Validate the date is not in the future
         dt = datetime.combine(value, datetime.min.time())
         new_val = as_utc(as_local(dt))
-        await self.coordinator.async_set_last_watered(new_val)
+        if self.entity_description.key == "last_fertilized":
+            await self.coordinator.async_set_last_fertilized(new_val)
+        else:
+            await self.coordinator.async_set_last_watered(new_val)
 
     @property
     def native_value(self) -> date | None:
@@ -94,7 +102,7 @@ class SimplePlantDate(CoordinatorEntity[SimplePlantCoordinator], DateEntity):
         if not self.coordinator.data:
             return None
 
-        date_str = self.coordinator.data.get("last_watered")
+        date_str = self.coordinator.data.get(self.entity_description.key)
         if not date_str:
             return None
 
