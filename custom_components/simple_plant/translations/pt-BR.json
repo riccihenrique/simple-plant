@@ -53,13 +53,13 @@
     },
     "binary_sensor": {
       "todo": {
-        "name": "Para regar"
+        "name": "Regar"
       },
       "problem": {
         "name": "Regagem atrasada"
       },
       "todo_fertilization": {
-        "name": "Para adubar"
+        "name": "Adubar"
       },
       "problem_fertilization": {
         "name": "Adubação atrasada"
@@ -111,6 +111,18 @@
   "exceptions": {
     "invalid_future_date": {
       "message": "Não é possível definir a data de rega no futuro."
+    }
+  },
+  "selector": {
+    "health": {
+      "options": {
+        "notset": "Não definido",
+        "poor": "Pobre",
+        "fair": "Razoável",
+        "good": "Boa",
+        "verygood": "Muito boa",
+        "excellent": "Excelente"
+      }
     }
   }
 }

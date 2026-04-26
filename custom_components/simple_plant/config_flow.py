@@ -94,11 +94,10 @@ def user_form() -> vol.Schema:
             ),
             vol.Required("health"): selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                    {
-                        "options": HEALTH_OPTIONS,
-                        "custom_value": False,
-                        "sort": False,
-                    }
+                    options=HEALTH_OPTIONS,
+                    translation_key="health",
+                    custom_value=False,
+                    sort=False,
                 )
             ),
             vol.Optional("species", default=""): str,

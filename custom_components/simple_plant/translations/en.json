@@ -112,5 +112,17 @@
     "invalid_future_date": {
       "message": "Cannot set watering date in the future."
     }
+  },
+  "selector": {
+    "health": {
+      "options": {
+        "notset": "Not Set",
+        "poor": "Poor",
+        "fair": "Fair",
+        "good": "Good",
+        "verygood": "Very Good",
+        "excellent": "Excellent"
+      }
+    }
   }
 }
