@@ -39,12 +39,21 @@
         "description": "Modify the species or picture of your plant. If you need help with the configuration have a look here: https://github.com/ndesgranges/simple-plant",
         "data": {
           "photo": "Photo",
-          "species": "Species/Variety of your plant (Optional)"
+          "species": "Species/Variety of your plant (Optional)",
+          "enable_fertilization": "Enable fertilization tracking"
+        }
+      },
+      "fertilization": {
+        "description": "Provide fertilization information for your plant.",
+        "data": {
+          "last_fertilized": "Last time fertilized",
+          "days_between_fertilizations": "Days between fertilizations"
         }
       }
     },
     "error": {
-      "upload_failed_type": "File upload failed, the file type is not a supported image type."
+      "upload_failed_type": "File upload failed, the file type is not a supported image type.",
+      "invalid_future_date": "Cannot set fertilization date in the future."
     }
   },
   "entity": {

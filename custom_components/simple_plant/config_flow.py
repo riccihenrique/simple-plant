@@ -128,7 +128,7 @@ def fertilization_form() -> vol.Schema:
     )
 
 
-def option_form(suggested_species: str | None = None) -> vol.Schema:
+def option_form(suggested_species: str | None = None, fertilization_enabled: bool = False) -> vol.Schema:
     """Return a device reconfiguration form."""
     LOGGER.debug("option_flow, 1st call : displaying form")
     return vol.Schema(
@@ -137,6 +137,7 @@ def option_form(suggested_species: str | None = None) -> vol.Schema:
             vol.Optional("photo"): selector.FileSelector(
                 selector.FileSelectorConfig(accept="image/*")
             ),
+            vol.Optional("enable_fertilization", default=fertilization_enabled): selector.BooleanSelector(),
         }
     )
 
@@ -242,7 +243,8 @@ class SimplePlantOptionFlowHandler(OptionsFlow):
         1st call = return form to show
         2nd call = return form with user input
         """
-        form = option_form(self.entry.data.get("species"))
+        fertilization_enabled = self.config_entry.data.get("enable_fertilization", False)
+        form = option_form(self.config_entry.data.get("species"), fertilization_enabled)
 
         if user_input is None:
             # 1st call
@@ -255,14 +257,38 @@ class SimplePlantOptionFlowHandler(OptionsFlow):
             try:
                 file_id = user_input["photo"]
                 self.user_inputs["photo"] = await save_image(self.hass, file_id)
-                remove_photo(self.hass, self.entry)
+                remove_photo(self.hass, self.config_entry)
             except ValueError:
                 return self.async_show_form(
-                    step_id="user",
+                    step_id="init",
                     errors={"base": "upload_failed_type"},
                 )
 
-        # On appelle le step de fin pour enregistrer les modifications
+        self.user_inputs["enable_fertilization"] = user_input.get("enable_fertilization", False)
+
+        if self.user_inputs["enable_fertilization"]:
+            return await self.async_step_fertilization()
+
+        # Fertilization disabled — strip any existing fertilization data
+        self.user_inputs.pop("last_fertilized", None)
+        self.user_inputs.pop("days_between_fertilizations", None)
+
+        return await self.async_end()
+
+    async def async_step_fertilization(self, user_input: dict | None = None) -> ConfigFlowResult:
+        """Provide fertilization information."""
+        if user_input is None:
+            return self.async_show_form(step_id="fertilization", data_schema=fertilization_form())
+
+        date = as_utc(as_local(datetime.fromisoformat(user_input["last_fertilized"])))
+        if date > utcnow():
+            return self.async_show_form(
+                step_id="fertilization",
+                data_schema=fertilization_form(),
+                errors={"base": "invalid_future_date"},
+            )
+
+        self.user_inputs.update(user_input)
         return await self.async_end()
 
     async def async_end(self) -> ConfigFlowResult:
@@ -274,6 +300,10 @@ class SimplePlantOptionFlowHandler(OptionsFlow):
 
         data = dict(self.config_entry.data)
         data.update(self.user_inputs)
+        # If fertilization was disabled, remove fertilization keys from data
+        if not data.get("enable_fertilization"):
+            data.pop("last_fertilized", None)
+            data.pop("days_between_fertilizations", None)
         self.hass.config_entries.async_update_entry(self.config_entry, data=data)
 
         return self.async_create_entry(

@@ -39,12 +39,21 @@
         "description": "Modifique a espécie ou a foto da sua planta. Se precisar de ajuda com a configuração, acesse: https://github.com/ndesgranges/simple-plant",
         "data": {
           "photo": "Foto",
-          "species": "Espécie/Variedade da sua planta (Opcional)"
+          "species": "Espécie/Variedade da sua planta (Opcional)",
+          "enable_fertilization": "Ativar controle de adubação"
+        }
+      },
+      "fertilization": {
+        "description": "Informe os dados de adubação da sua planta.",
+        "data": {
+          "last_fertilized": "Última adubação",
+          "days_between_fertilizations": "Dias entre adubações"
         }
       }
     },
     "error": {
-      "upload_failed_type": "Falha no upload do arquivo, o tipo de arquivo não é um tipo de imagem suportado."
+      "upload_failed_type": "Falha no upload do arquivo, o tipo de arquivo não é um tipo de imagem suportado.",
+      "invalid_future_date": "Não é possível definir a data de adubação no futuro."
     }
   },
   "entity": {

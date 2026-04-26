@@ -18,6 +18,7 @@ from homeassistant.helpers.device_registry import (
     async_entries_for_config_entry,
     async_get,
 )
+from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.util import slugify
 
 from .config_flow import remove_photo
@@ -53,6 +54,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Remove fertilization entities if fertilization is disabled
+    if not entry.data.get("enable_fertilization", False):
+        _remove_fertilization_entities(hass, entry)
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
     entry.async_on_unload(
@@ -113,6 +118,26 @@ async def on_device_registry_update_handler(
         hass.config_entries.async_update_entry(entry, data=data, title=new_title)
         hass.config_entries.async_schedule_reload(entry.entry_id)
         device_registry.async_remove_device(device.id)
+
+
+FERTILIZATION_ENTITY_KEYS = [
+    "todo_fertilization",
+    "problem_fertilization",
+    "last_fertilized",
+    "days_between_fertilizations",
+    "next_fertilization",
+    "mark_fertilized",
+]
+
+
+def _remove_fertilization_entities(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Remove fertilization entities from the entity registry."""
+    entity_registry = async_get_entity_registry(hass)
+    entities = entity_registry.entities.get_entries_for_config_entry_id(entry.entry_id)
+    for entity_entry in entities:
+        if any(key in entity_entry.entity_id for key in FERTILIZATION_ENTITY_KEYS):
+            LOGGER.debug("Removing fertilization entity %s", entity_entry.entity_id)
+            entity_registry.async_remove(entity_entry.entity_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
