@@ -83,8 +83,8 @@ class SimplePlantNumber(NumberEntity):
         self.entity_id = f"number.{DOMAIN}_{description.key}_{device}"
         self._attr_unique_id = f"{DOMAIN}_{description.key}_{device}"
 
-        # set value
-        self._fallback_value = entry.data.get(description.key)
+        # set value — default to 30 days if not configured (migration from older entries)
+        self._fallback_value = entry.data.get(description.key) or 30
 
         # Set up device info
         self._attr_device_info = self.coordinator.device_info

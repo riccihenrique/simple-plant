@@ -10,7 +10,7 @@ from homeassistant.components.date import (
     DateEntityDescription,
 )
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.util.dt import as_local, as_utc
+from homeassistant.util.dt import as_local, as_utc, utcnow
 
 from .const import DOMAIN
 from .coordinator import SimplePlantCoordinator
@@ -65,9 +65,13 @@ class SimplePlantDate(CoordinatorEntity[SimplePlantCoordinator], DateEntity):
 
         device = self.coordinator.device
 
-        self._fallback_value = as_local(
-            datetime.fromisoformat(str(entry.data.get(description.key)))
-        ).date()
+        raw_value = entry.data.get(description.key)
+        if raw_value is not None:
+            self._fallback_value = as_local(
+                datetime.fromisoformat(str(raw_value))
+            ).date()
+        else:
+            self._fallback_value = as_local(utcnow()).date()
 
         self.entity_id = f"date.{DOMAIN}_{description.key}_{device}"
         self._attr_unique_id = f"{DOMAIN}_{description.key}_{device}"
